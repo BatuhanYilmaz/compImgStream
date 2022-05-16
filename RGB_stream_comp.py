@@ -13,6 +13,8 @@ from LZ4Coder import LZ4Coder
 ap = ArgumentParser()
 ap.add_argument("-i", "--input", type=int, default=0, required=True,
 	help="Port number of camera (0 for built-in webcam)")
+ap.add_argument("-d", "--display", action='store_true', required=False,
+	help="Display option")
 ap.add_argument("-c", "--compressor", type=str, default="0", required=True,
 	help="Type of compression algorithm (0 for ZSTD, 1 for LZ4)")
 ap.add_argument("-r", "--ratecmp", type=int, default=-3, required=False,
@@ -48,23 +50,22 @@ myCoder = myCoder_comps[args["compressor"]]
 while(cap.isOpened()):
 
     ret, frame = cap.read()
-
+    # Compress frames and get elapsed time for it
     comp_bytes, time_comp = myCoder.compress_frame(frame, comp_rate=args["ratecmp"], n_threads=args["threads"])
     
-    # Pack frame shape as bytearray
+    # Pack frame shape as bytestream w/ pickle
     frame_shape = [frame.shape[0], frame.shape[1], frame.shape[2]]
-
-    
-
     pub_msg =  [frame_shape, time_comp, comp_bytes]
     pub_msg_dumps = pickle.dumps(pub_msg)
 
+    # Publish the message
     rgb_channel.basic_publish(exchange="", routing_key=RGB_QUEUE, body=pub_msg_dumps)
 
-    cv2.imshow("Rasp RGB Stream", frame)
-    
-    if cv2.waitKey(1) == 27:
-        break
+    if args["display"]:
+        cv2.imshow("Rasp RGB Stream", frame)
+        
+        if cv2.waitKey(1) == 27:
+            break
     
         
 cap.release()

@@ -37,6 +37,8 @@ ap = ArgumentParser()
 
 ap.add_argument("-c", "--compressor", type=str, default="0", required=True,
 	help="Type of compression algorithm (0 for ZSTD, 1 for LZ4)")
+ap.add_argument("-n", "--nodisplay", action='store_false', required=False,
+	help="Disable display")
 ap.add_argument("-r", "--ratecmp", type=int, default=-3, required=False,
 	help="Compression rate (ZSTD: btw. -100 and 22) (LZ4: btw. 0 and 16)")
 ap.add_argument("-t", "--threads", type=int, default=4, required=False,
